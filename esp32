@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32-CAM 遠端影像與馬達控制</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #1e1e2f; color: #fff; text-align: center; padding: 20px; }
+    .card { background: #2d2d44; max-width: 500px; margin: 0 auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    img { width: 100%; border-radius: 8px; background: #000; min-height: 240px; }
+    .slider-container { margin-top: 20px; }
+    input[type=range] { width: 80%; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>ESP32-CAM 遠端監控</h2>
+    
+    <!-- 貼入 Ngrok 產生的 HTTPS 影像網址 -->
+    <img id="stream" src="https://192.168.0.98/stream" alt="即時影像載入中...">
+
+    <div class="slider-container">
+      <h3>馬達角度: <span id="angleVal">90</span>°</h3>
+      <input type="range" min="0" max="180" value="90" id="angleSlider" oninput="updateAngle(this.value)">
+    </div>
+  </div>
+
+  <script>
+    // 替換為你的 ThingsBoard ACCESS_TOKEN
+    const TB_TOKEN = "lrybJdI8ebXAZnll5W6q"; 
+
+    function updateAngle(val) {
+      document.getElementById('angleVal').innerText = val;
+      
+      // 直接透過 HTTP POST 傳送 RPC 指令給 ThingsBoard
+      fetch(`https://thingsboard.cloud/api/v1/${TB_TOKEN}/telemetry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ angle: parseInt(val) })
+      }).catch(err => console.error("發送失敗:", err));
+    }
+  </script>
+</body>
+</html>
